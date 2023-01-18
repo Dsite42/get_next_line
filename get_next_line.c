@@ -6,7 +6,7 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/01/18 10:10:48 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/01/18 18:13:33 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 
 #include <string.h>
 
-size_t	ft_strlen(const char *s, char end)
+int	ft_strlen(const char *s, char end)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
 	while (*(s + i) != end && *(s + i) != '\0')
@@ -69,7 +69,7 @@ char	*ft_strdup(const char *s, char end)
 	return (dup_start);
 }
 
-
+/*
 int len_line(char *tmp)
 {
 	static int	cnt = 0;
@@ -91,6 +91,7 @@ int len_line(char *tmp)
 	if (tmp[i] == '\0' && cnt != 0)
 		return (-i);
 }
+*/
 
 char	*ft_strjoin(char *s1, char *s2, int start_s2)
 {
@@ -131,13 +132,31 @@ char *get_next_line(int fd)
 	char		*buf;
 	static char	*tmp = "\0";
 	static int			isEOF = 0;
-	char		*new_line;
+	static char		*new_line = NULL;
 	char		str_end;
 
+	if (fd < 0 || fd == 1000)
+	{
+		return (NULL);
+	}
 	str_end = '\0';
 	if (tmp == NULL)
+	{
+		//printf("hier?");
 		return (NULL);
+	}
+	/*
+	if (new_line != NULL)
+	{
+		printf("mist\n");
+		free(new_line);
+	}
+		printf("free%s\n", new_line);
+	*/
 	new_line = NULL;
+	//printf("PPPPPPPPPPPPPPPP:%c", *tmp);
+	while (ft_strlen(tmp, '\n') == 0 && (isEOF == BUFFER_SIZE || *tmp == '\0'))
+	{
 	if (ft_strlen(tmp, '\n') == 0)
 	{
 		buf = (char *) malloc(BUFFER_SIZE * sizeof(char) +1);
@@ -145,10 +164,23 @@ char *get_next_line(int fd)
 			return (0);
 		isEOF = read(fd, buf, BUFFER_SIZE - 0);
 		buf[isEOF] = '\0';
+		if ((isEOF == 0 && *tmp == '\0') || isEOF == -1)
+		{
+				if (isEOF != -1 && tmp != NULL)
+				{
+					//printf("hier2?%s\n", tmp);
+					free(tmp);
+					tmp = NULL;
+				}
+				//printf("free(buf)\n");
+			free(buf);
+			return (NULL);
+		}
 	}
 	//printf("test:%c\n", *tmp);
 	if (ft_strlen(tmp, '\n') == 0)
 		tmp = ft_strjoin(tmp, buf, 0);
+	}
 	if (ft_strlen(tmp, '\n') != 0)
 	{
 		new_line = ft_strdup(tmp, '\n');
@@ -171,48 +203,59 @@ char *get_next_line(int fd)
 		//printf("isEOF:%i\n", isEOF);
 
 	//if (new_line == NULL && isEOF < BUFFER_SIZE - 1 && ft_strlen(tmp, '\n') == 0)
-	if (isEOF == 0 && ft_strlen(tmp, '\n') == 0)
+	
+	if ((isEOF == 0 || isEOF < BUFFER_SIZE) && ft_strlen(tmp, '\n') == 0 && new_line == NULL)
 	{
-		//printf("fuckfu:%li\n", ft_strlen(tmp, '\n'));
+		//printf("fuckfu:%i\n", ft_strlen(tmp, '\n'));
 		new_line = ft_strjoin(&str_end, tmp, 0);
 		tmp = NULL;
 		return (new_line);
 	}
+	
 	return (new_line);
 }
 
-
+/*
 int	main(void)
 {
 	//printf("%i", BUFFER_SIZE);
 
 	int fd;
-	int sz;
+	int readd;
 	char *next_line;
 	int	cnt_line = 0;
 	int loop = 6;
 
 	fd = open("file.txt", O_RDONLY);
-
-
-	while (cnt_line != loop)
-	{
-	next_line = get_next_line(fd);
-	if (next_line != NULL)
-		printf("get_next_line:%s\n", next_line);
-	if (next_line != NULL)
-		cnt_line++;
-	}
+	//readd = read(fd, next_line, 10);
+	//printf("fd:%i", readd);
+	//fd = open("file.txt", O_RDONLY);
+	
+	
+	//while (cnt_line != loop)
+	//{
+	//next_line = get_next_line(fd);
+	////if (next_line != NULL)
+	//	printf("get_next_line:%s\n", next_line);
+	////if (next_line != NULL)
+	//	cnt_line++;
+	//}
+	
 		next_line = get_next_line(fd);
 	printf("get_next_line:%s\n", next_line);
 
 
+	printf("get_next_line:%s\n", get_next_line(fd));
+	printf("get_next_line:%s\n", get_next_line(fd));
 	//printf("get_next_line:%s\n", get_next_line(fd));
 	//printf("get_next_line:%s\n", get_next_line(fd));
 	//printf("get_next_line:%s\n", get_next_line(fd));
+	//printf("get_next_line:%s\n", get_next_line(fd));
+
 	close(fd);
 	//printf("%i bytes were read.\n", sz);
 	//printf("Content:%c\n", buf[3]);
 
 
 }
+*/
