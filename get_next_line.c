@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chris <chris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/01/17 22:39:42 by chris            ###   ########.fr       */
+/*   Updated: 2023/01/18 10:10:48 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ size_t	ft_strlen(const char *s, char end)
 	}
 	if (end == '\n' && *(s + i) == '\n' && i == 0)
 	{
-		return (1);
+		return (-1);
 	}
 
 	//printf("le%lin%cf:%s\n", i,*(s + i), s);
@@ -140,10 +140,10 @@ char *get_next_line(int fd)
 	new_line = NULL;
 	if (ft_strlen(tmp, '\n') == 0)
 	{
-		buf = (char *) malloc(BUFFER_SIZE * sizeof(char));
+		buf = (char *) malloc(BUFFER_SIZE * sizeof(char) +1);
 		if (buf == NULL)
 			return (0);
-		isEOF = read(fd, buf, BUFFER_SIZE - 1);
+		isEOF = read(fd, buf, BUFFER_SIZE - 0);
 		buf[isEOF] = '\0';
 	}
 	//printf("test:%c\n", *tmp);
@@ -152,7 +152,10 @@ char *get_next_line(int fd)
 	if (ft_strlen(tmp, '\n') != 0)
 	{
 		new_line = ft_strdup(tmp, '\n');
-		tmp = ft_strjoin(&str_end, tmp, ft_strlen(tmp, '\n') + 1);
+		if (ft_strlen(tmp, '\n') == -1)
+			tmp = ft_strjoin(&str_end, tmp, ft_strlen(tmp, '\n') + 2);
+		else
+			tmp = ft_strjoin(&str_end, tmp, ft_strlen(tmp, '\n') + 1);
 		//printf("reduced:%s\n", tmp);
 	}
 	//printf("new_line:%s\n", new_line);
@@ -170,7 +173,7 @@ char *get_next_line(int fd)
 	//if (new_line == NULL && isEOF < BUFFER_SIZE - 1 && ft_strlen(tmp, '\n') == 0)
 	if (isEOF == 0 && ft_strlen(tmp, '\n') == 0)
 	{
-		printf("fuckfu:%li\n", ft_strlen(tmp, '\n'));
+		//printf("fuckfu:%li\n", ft_strlen(tmp, '\n'));
 		new_line = ft_strjoin(&str_end, tmp, 0);
 		tmp = NULL;
 		return (new_line);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chris <chris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:00:57 by chris             #+#    #+#             */
-/*   Updated: 2023/01/17 19:20:24 by chris            ###   ########.fr       */
+/*   Updated: 2023/01/18 10:45:35 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,5 +20,5 @@ char *get_next_line(int fd);
 #endif
 
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 40
+# define BUFFER_SIZE 42
 #endif
