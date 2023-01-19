@@ -6,7 +6,7 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:00:57 by chris             #+#    #+#             */
-/*   Updated: 2023/01/18 17:33:33 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/01/19 16:20:37 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,5 +20,5 @@ char *get_next_line(int fd);
 #endif
 
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 5
+# define BUFFER_SIZE 1000000
 #endif

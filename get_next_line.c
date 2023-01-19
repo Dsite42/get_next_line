@@ -6,7 +6,7 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/01/18 18:13:33 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/01/19 16:34:17 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ int	ft_strlen(const char *s, char end)
 	int	i;
 
 	i = 0;
+	if (s == NULL)
+		return (0);
 	while (*(s + i) != end && *(s + i) != '\0')
 	{
 		i++;
@@ -48,8 +50,13 @@ char	*ft_strdup(const char *s, char end)
 	int		len;
 
 	len = ft_strlen((char *)s, end);
-	if (end == '\n')
+	//printf("len:%i%s", len,s);
+	if (len == -1)
+		len = 1;
+	else if (end == '\n')
 		len++;
+	//printf("len:%i%s", len,s);
+
 	dup = malloc((len * sizeof(char)) + 1);
 	if (dup == NULL)
 		return (NULL);
@@ -104,11 +111,13 @@ char	*ft_strjoin(char *s1, char *s2, int start_s2)
 	if (joined == NULL)
 		return (NULL);
 	i = 0;
-
-	while (s1[i] != '\0')
+	if (s1 != NULL)
 	{
-		joined[i] = s1[i];
-		i++;
+		while (s1[i] != '\0')
+		{
+			joined[i] = s1[i];
+			i++;
+		}
 	}
 	j = start_s2;
 	while (s2[j] != '\0')
@@ -118,7 +127,7 @@ char	*ft_strjoin(char *s1, char *s2, int start_s2)
 		j++;
 	}
 	joined[i] = '\0';
-	if (*s1 != '\0')
+	if (s1 != NULL)
 	{
 		//printf("fuck:%c\n", *s1);
 		free(s1);
@@ -130,64 +139,87 @@ char	*ft_strjoin(char *s1, char *s2, int start_s2)
 char *get_next_line(int fd)
 {
 	char		*buf;
-	static char	*tmp = "\0";
+	static char	*tmp = NULL;
 	static int			isEOF = 0;
 	static char		*new_line = NULL;
 	char		str_end;
+	static int	cnt_read = 0;
 
-	if (fd < 0 || fd == 1000)
-	{
-		return (NULL);
-	}
 	str_end = '\0';
-	if (tmp == NULL)
+	if (tmp == NULL && cnt_read > 1)
 	{
+		//if (isEOF != -1)
+		//{
+		//	isEOF = read(fd, buf, BUFFER_SIZE - 0);
+		//	cnt_read++;
+		//	isEOF = read(fd, buf, BUFFER_SIZE - 0);
+		//	cnt_read++;
+		//	isEOF = read(fd, buf, BUFFER_SIZE - 0);
+		//	cnt_read++;
+		//	isEOF = read(fd, buf, BUFFER_SIZE - 0);
+		//	cnt_read++;
+		//	isEOF = read(fd, buf, BUFFER_SIZE - 0);
+		//	cnt_read++;
+		//	printf("EOFF:%i\n",isEOF);
+		//}
 		//printf("hier?");
 		return (NULL);
 	}
+	
 	/*
 	if (new_line != NULL)
 	{
-		printf("mist\n");
-		free(new_line);
+		//printf("mist\n%s", new_line);
+		//free(new_line);
 	}
-		printf("free%s\n", new_line);
+		//printf("free%s\n", new_line);
 	*/
+
 	new_line = NULL;
 	//printf("PPPPPPPPPPPPPPPP:%c", *tmp);
-	while (ft_strlen(tmp, '\n') == 0 && (isEOF == BUFFER_SIZE || *tmp == '\0'))
+	while ((ft_strlen(tmp, '\n') == 0 && (isEOF == BUFFER_SIZE || tmp == NULL)))
 	{
-	if (ft_strlen(tmp, '\n') == 0)
-	{
-		buf = (char *) malloc(BUFFER_SIZE * sizeof(char) +1);
-		if (buf == NULL)
-			return (0);
-		isEOF = read(fd, buf, BUFFER_SIZE - 0);
-		buf[isEOF] = '\0';
-		if ((isEOF == 0 && *tmp == '\0') || isEOF == -1)
+		if (ft_strlen(tmp, '\n') == 0)
 		{
-				if (isEOF != -1 && tmp != NULL)
-				{
-					//printf("hier2?%s\n", tmp);
-					free(tmp);
-					tmp = NULL;
-				}
-				//printf("free(buf)\n");
-			free(buf);
-			return (NULL);
+			buf = (char *) malloc(BUFFER_SIZE * sizeof(char) +1);
+			if (buf == NULL)
+				return (0);
+			isEOF = read(fd, buf, BUFFER_SIZE - 0);
+			cnt_read++;
+			//printf("EOF:%i\n",isEOF);
+			if (isEOF != -1)
+				buf[isEOF] = '\0';
+			if (((isEOF == 0 && tmp == NULL) || isEOF == -1))
+			{
+					if (isEOF != -1 && tmp != NULL )
+					{
+						//printf("hier2?%s\n", tmp);
+						if (cnt_read > 1)
+							free(tmp);
+						tmp = NULL;
+					}
+					//printf("free(buf)\n");
+				free(buf);
+				return (NULL);
+			}
 		}
-	}
-	//printf("test:%c\n", *tmp);
-	if (ft_strlen(tmp, '\n') == 0)
-		tmp = ft_strjoin(tmp, buf, 0);
+		//printf("test:%c\n", *tmp);
+		if (ft_strlen(tmp, '\n') == 0)
+		{
+			//printf("slashN");
+			tmp = ft_strjoin(tmp, buf, 0);
+		}
 	}
 	if (ft_strlen(tmp, '\n') != 0)
 	{
 		new_line = ft_strdup(tmp, '\n');
 		if (ft_strlen(tmp, '\n') == -1)
-			tmp = ft_strjoin(&str_end, tmp, ft_strlen(tmp, '\n') + 2);
+		{
+			//printf("MinusEins");
+			tmp = ft_strjoin(NULL, tmp, 1);
+		}
 		else
-			tmp = ft_strjoin(&str_end, tmp, ft_strlen(tmp, '\n') + 1);
+			tmp = ft_strjoin(NULL, tmp, ft_strlen(tmp, '\n') + 1);
 		//printf("reduced:%s\n", tmp);
 	}
 	//printf("new_line:%s\n", new_line);
@@ -207,8 +239,13 @@ char *get_next_line(int fd)
 	if ((isEOF == 0 || isEOF < BUFFER_SIZE) && ft_strlen(tmp, '\n') == 0 && new_line == NULL)
 	{
 		//printf("fuckfu:%i\n", ft_strlen(tmp, '\n'));
-		new_line = ft_strjoin(&str_end, tmp, 0);
+		new_line = ft_strjoin(NULL, tmp, 0);
 		tmp = NULL;
+		if (*new_line == '\0')
+		{
+			free(new_line);
+			return (NULL);
+		}
 		return (new_line);
 	}
 	
@@ -226,7 +263,10 @@ int	main(void)
 	int	cnt_line = 0;
 	int loop = 6;
 
-	fd = open("file.txt", O_RDONLY);
+	//fd = 100;
+	//printf("get_next_line:%s\n", get_next_line(fd));
+
+	fd = open("/Users/cgodecke/francinette/tests/get_next_line/fsoares/only_nl.txt", O_RDONLY);
 	//readd = read(fd, next_line, 10);
 	//printf("fd:%i", readd);
 	//fd = open("file.txt", O_RDONLY);
@@ -245,13 +285,20 @@ int	main(void)
 	printf("get_next_line:%s\n", next_line);
 
 
+	//printf("get_next_line:%s\n", get_next_line(fd));
 	printf("get_next_line:%s\n", get_next_line(fd));
-	printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
+	//printf("fd:%d\n", fd);
 
+	//	close(fd);
+	//fd = open("/Users/cgodecke/francinette/tests/get_next_line/fsoares/multiple_nl.txt", O_RDONLY);
+
+	//printf("get_next_line:%s\n", get_next_line(fd));
+			//printf("fd:%d\n", fd);
+
+	printf("get_next_line:%s\n", get_next_line(fd));
+	//printf("get_next_line:%s\n", get_next_line(fd));
+	//printf("get_next_line:%s\n", get_next_line(fd));
+	//printf("get_next_line:%s\n", get_next_line(fd));
 	close(fd);
 	//printf("%i bytes were read.\n", sz);
 	//printf("Content:%c\n", buf[3]);
