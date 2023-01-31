@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chris <chris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/01/30 13:32:04 by chris            ###   ########.fr       */
+/*   Updated: 2023/01/31 11:03:37 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,17 @@ void	*read_new_line(char **tmp, int *is_eof, int *cnt_read, int fd)
 					free(*tmp);
 				*tmp = NULL;
 			}
+			if (*is_eof == -1)
+			{
+				printf("XXXXXXXXXX");
+				bzero(buf, BUFFER_SIZE+1);
+				*cnt_read = 0;
+				if (*tmp != NULL)
+					free (*tmp);
+				*tmp = NULL;
+			}
 			free(buf);
+			
 			return (NULL);
 		}
 		*tmp = ft_strjoin(*tmp, buf, 0);
