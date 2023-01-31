@@ -6,7 +6,7 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/01/31 11:03:37 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/01/31 18:57:41 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,69 +15,37 @@
 #include <fcntl.h>
 #include <string.h>
 
-char	*get_new_line_from_buffer(char **tmp)
+char	*get_new_line_from_tmp(char **tmp)
 {
 	char	*new_line;
 
+	if (line_counter(*tmp) == 0)
+		return (*tmp);
 	new_line = ft_strdup(*tmp, '\n');
-	if (ft_strlen(*tmp, '\n') == -1)
-		*tmp = ft_strjoin(NULL, *tmp, 1);
-	else
-		*tmp = ft_strjoin(NULL, *tmp, ft_strlen(*tmp, '\n') + 1);
+	*tmp = reduce_tmp(*tmp, ft_strlen(*tmp, '\n') + 0);
 	return (new_line);
 }
 
-void	*fill_buffer(char **buf, int *is_eof, int *cnt_read, int fd)
+int	fill_buffer(char **buf, int fd)
 {
+	int		is_eof;
+
 	*buf = (char *) malloc(BUFFER_SIZE * sizeof(char) + 1);
 	if (*buf == NULL)
-		return (NULL);
-	*is_eof = read(fd, *buf, BUFFER_SIZE - 0);
-	*cnt_read = *cnt_read + 1;
-	if (*is_eof != -1)
-		(*buf)[*is_eof] = '\0';
-	return ((void *) 1);
-}
-
-void	*read_new_line(char **tmp, int *is_eof, int *cnt_read, int fd)
-{
-	char	*buf;
-
-	while ((ft_strlen(*tmp, '\n') == 0
-			&& (*is_eof == BUFFER_SIZE || *tmp == NULL)))
+		return (0);
+	is_eof = read(fd, *buf, BUFFER_SIZE);
+	if (is_eof == -1 || is_eof == 0)
 	{
-		buf = NULL;
-		if (fill_buffer(&buf, is_eof, cnt_read, fd) == NULL)
-			return (NULL);
-		if (((*is_eof == 0 && *tmp == NULL) || *is_eof == -1))
-		{
-			if (*is_eof != -1 && *tmp != NULL )
-			{
-				if (*cnt_read > 1)
-					free(*tmp);
-				*tmp = NULL;
-			}
-			if (*is_eof == -1)
-			{
-				printf("XXXXXXXXXX");
-				bzero(buf, BUFFER_SIZE+1);
-				*cnt_read = 0;
-				if (*tmp != NULL)
-					free (*tmp);
-				*tmp = NULL;
-			}
-			free(buf);
-			
-			return (NULL);
-		}
-		*tmp = ft_strjoin(*tmp, buf, 0);
+		free(*buf);
+		return (is_eof);
 	}
-	return ((void *)1);
+	(*buf)[is_eof] = '\0';
+	return (is_eof);
 }
 
 char	*get_last_line(char **tmp, char **new_line)
 {
-	*new_line = ft_strjoin(NULL, *tmp, 0);
+	*new_line = ft_strjoin(NULL, *tmp);
 	*tmp = NULL;
 	if (**new_line == '\0')
 	{
@@ -90,24 +58,34 @@ char	*get_last_line(char **tmp, char **new_line)
 char	*get_next_line(int fd)
 {
 	static char	*tmp = NULL;
-	static int	is_eof = 0;
-	static char	*new_line = NULL;
-	static int	cnt_read = 0;
+	char		*new_line;
+	int			is_eof;
 
-	if (tmp == NULL && cnt_read > 1)
-		return (NULL);
 	new_line = NULL;
-	if (read_new_line(&tmp, &is_eof, &cnt_read, fd) == NULL)
-		return (NULL);
-	if (ft_strlen(tmp, '\n') != 0)
-		new_line = get_new_line_from_buffer(&tmp);
-	if ((is_eof == 0 || is_eof < BUFFER_SIZE)
-		&& ft_strlen(tmp, '\n') == 0 && new_line == NULL)
-		return (get_last_line(&tmp, &new_line));
+	if (line_counter(tmp) != 0)
+		new_line = get_new_line_from_tmp(&tmp);
+	//else
+	//{
+	//	new_line = tmp;
+	//	tmp = NULL;
+	//}
+	else
+	{
+		is_eof = read_new_line(&tmp, fd);
+		if (is_eof == -1)
+			return (NULL);
+	}
+	if (new_line == NULL)
+	{
+		new_line = get_new_line_from_tmp(&tmp);
+		//if (is_eof == 0 && line_counter(tmp) == 0)
+		//	tmp = NULL;
+	}
+	//printf("tmp:%s", tmp);
 	return (new_line);
 }
 
-/*
+
 int	main(void)
 {
 	//printf("%i", BUFFER_SIZE);
@@ -140,8 +118,8 @@ int	main(void)
 	printf("get_next_line:%s\n", next_line);
 
 
-	//printf("get_next_line:%s\n", get_next_line(fd));
 	printf("get_next_line:%s\n", get_next_line(fd));
+	//printf("get_next_line:%s\n", get_next_line(fd));
 	//printf("fd:%d\n", fd);
 
 	//	close(fd);
@@ -160,4 +138,3 @@ int	main(void)
 
 
 }
-*/

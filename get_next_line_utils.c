@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chris <chris@student.42.fr>                +#+  +:+       +#+        */
+/*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:03 by chris             #+#    #+#             */
-/*   Updated: 2023/01/21 21:33:24 by chris            ###   ########.fr       */
+/*   Updated: 2023/01/31 17:53:33 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdio.h>
 
 int	ft_strlen(const char *s, char end)
 {
@@ -23,24 +24,43 @@ int	ft_strlen(const char *s, char end)
 	{
 		i++;
 	}
-	if (end == '\n' && *(s + i) == '\0')
+	if (end == '\n' && *(s + i) == '\n')
 	{
-		return (0);
-	}
-	if (end == '\n' && *(s + i) == '\n' && i == 0)
-	{
-		return (-1);
+		return (i + 1);
 	}
 	return (i);
 }
 
-void	cpy_until_end(const char *src, char *dest, int *i, char end)
+
+int	line_counter(const char *str)
 {
-	while (src[*i] != end)
+	int	i;
+
+	i = 0;
+	if (str == NULL)
+		return (0);
+	while (*str != '\0')
 	{
-		dest[*i] = src[*i];
-		*i = *i + 1;
+		if (*str == '\n')
+			i++;
+		str++;
 	}
+	return (i);
+}
+
+void	cpy_len(const char *src, char *dest, int len)
+{
+	int	i;
+
+	i = 0;
+	while (i < len)
+	{
+		*dest = *src;
+		dest++;
+		src++;
+		i++;
+	}
+	*dest = '\0';
 }
 
 char	*ft_strdup(const char *s, char end)
@@ -52,29 +72,18 @@ char	*ft_strdup(const char *s, char end)
 
 	i = 0;
 	len = ft_strlen((char *)s, end);
-	if (len == -1)
-		len = 1;
-	else if (end == '\n')
-		len++;
 	dup = malloc((len * sizeof(char)) + 1);
 	if (dup == NULL)
 		return (NULL);
 	dup_start = dup;
-	cpy_until_end(s, dup, &i, end);
-	if (s[i] == '\n')
-	{
-		dup[i] = '\n';
-		i++;
-	}
-	dup[i] = '\0';
+	cpy_len(s, dup, len);
 	return (dup_start);
 }
 
-char	*ft_strjoin(char *s1, char *s2, int start_s2)
+char	*ft_strjoin(char *s1, char *s2)
 {
 	char	*joined;
 	int		i;
-	int		j;
 
 	joined = (char *) malloc((ft_strlen(s1, '\0') + ft_strlen(s2, '\0') + 1)
 			* sizeof(char));
@@ -82,17 +91,58 @@ char	*ft_strjoin(char *s1, char *s2, int start_s2)
 		return (NULL);
 	i = 0;
 	if (s1 != NULL)
-		cpy_until_end(s1, joined, &i, '\0');
-	j = start_s2;
-	while (s2[j] != '\0')
-	{
-		joined[i] = s2[j];
-		i++;
-		j++;
-	}
-	joined[i] = '\0';
+		cpy_len(s1, joined, ft_strlen(s1, '\0'));
+	cpy_len(s2, joined + ft_strlen(s1, '\0'), ft_strlen(s2, '\0'));
 	if (s1 != NULL)
 		free(s1);
 	free(s2);
 	return (joined);
+}
+
+char	*reduce_tmp(char *str, int start)
+{
+	char	*new_tmp;
+	int		i;
+
+	if (ft_strlen(&str[start], '\0') == 0)
+	{
+		free(str);
+		return (NULL);
+	}
+	//printf("tmp2:%s", &str[start]);
+	new_tmp = (char *) malloc((ft_strlen(&str[start], '\0') + 1)
+			* sizeof(char));
+	if (new_tmp == NULL)
+		return (NULL);
+	i = 0;
+	while (str[start] != '\0')
+	{
+		new_tmp[i] = str[start];
+		start++;
+		i++;
+	}
+	new_tmp[i] = '\0';
+	free(str);
+	return (new_tmp);
+}
+
+
+int read_new_line(char **tmp, int fd)
+{
+	char 	*buf;
+	int		is_eof;
+
+	while (line_counter(*tmp) == 0 && is_eof != 0)
+	{
+		is_eof = fill_buffer(&buf, fd);
+		if (is_eof == -1)
+		{
+			free (*tmp);
+			*tmp = NULL;
+			return (-1);
+		}
+		if (is_eof != 0)
+			*tmp = ft_strjoin(*tmp, buf);
+	}
+	return (is_eof);
 }
