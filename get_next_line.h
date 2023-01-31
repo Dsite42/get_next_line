@@ -6,7 +6,7 @@
 /*   By: chris <chris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:00:57 by chris             #+#    #+#             */
-/*   Updated: 2023/01/21 21:38:22 by chris            ###   ########.fr       */
+/*   Updated: 2023/01/30 11:57:10 by chris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,5 @@ void	cpy_until_end(const char *src, char *dest, int *i, char end);
 #endif
 
 #ifndef BUFFER_SIZE
-# define BUFFER_SIZE 10000
+# define BUFFER_SIZE 100
 #endif
