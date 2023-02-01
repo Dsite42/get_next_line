@@ -6,7 +6,7 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:00:57 by chris             #+#    #+#             */
-/*   Updated: 2023/02/01 11:19:40 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/02/01 17:32:21 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,21 +16,18 @@
 # include <unistd.h>
 # include <stdlib.h>
 
-char 	*get_next_line(int fd);
-char	*ft_strdup(const char *s, char end);
-char	*ft_strjoin(char *s1, char *s2);
-int		ft_strlen(const char *s, char end);
+# ifndef BUFFER_SIZE
+#  define BUFFER_SIZE 42
+# endif
+
+char	*get_next_line(int fd);
+char	*gnl_strdup(const char *s, char end);
+char	*gnl_strjoin(char *s1, char *s2);
+int		gnl_strlen(const char *s, char end);
 void	cpy_len(const char *src, char *dest, int len);
-int	line_counter(const char *str);
+int		line_counter(const char *str);
 char	*reduce_tmp(char *str, int start);
-int read_new_line(char **tmp, int fd);
-int	fill_buffer(char **buf, int fd);
+int		read_new_line(char **tmp, int fd);
+int		fill_buffer(char **buf, int fd);
 
-
-
-
-#endif
-
-#ifndef BUFFER_SIZE
-# define BUFFER_SIZE 42
 #endif

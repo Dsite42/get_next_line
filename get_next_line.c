@@ -6,23 +6,67 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/02/01 14:43:21 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/02/01 17:28:43 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include <stdio.h>
-#include <fcntl.h>
-#include <string.h>
+
+char	*reduce_tmp(char *str, int start)
+{
+	char	*new_tmp;
+	int		i;
+
+	if (gnl_strlen(&str[start], '\0') == 0)
+	{
+		free(str);
+		return (NULL);
+	}
+	new_tmp = (char *) malloc((gnl_strlen(&str[start], '\0') + 1)
+			* sizeof(char));
+	if (new_tmp == NULL)
+		return (NULL);
+	i = 0;
+	while (str[start] != '\0')
+	{
+		new_tmp[i] = str[start];
+		start++;
+		i++;
+	}
+	new_tmp[i] = '\0';
+	free(str);
+	return (new_tmp);
+}
+
+int	read_new_line(char **tmp, int fd)
+{
+	char	*buf;
+	int		is_eof;
+
+	is_eof = -100;
+	while (line_counter(*tmp) == 0 && is_eof != 0)
+	{
+		if (is_eof < BUFFER_SIZE && is_eof != -100)
+			break ;
+		is_eof = fill_buffer(&buf, fd);
+		if (is_eof == -1)
+		{
+			free (*tmp);
+			*tmp = NULL;
+			return (-1);
+		}
+		if (is_eof != 0)
+			*tmp = gnl_strjoin(*tmp, buf);
+	}
+	return (is_eof);
+}
 
 char	*get_new_line_from_tmp(char **tmp)
 {
 	char	*new_line;
 
-	//if (line_counter(*tmp) == 0)
-	//	return (*tmp);
-	new_line = ft_strdup(*tmp, '\n');
-	*tmp = reduce_tmp(*tmp, ft_strlen(*tmp, '\n') + 0);
+	new_line = gnl_strdup(*tmp, '\n');
+	*tmp = reduce_tmp(*tmp, gnl_strlen(*tmp, '\n') + 0);
 	return (new_line);
 }
 
@@ -43,18 +87,6 @@ int	fill_buffer(char **buf, int fd)
 	return (is_eof);
 }
 
-char	*get_last_line(char **tmp, char **new_line)
-{
-	*new_line = ft_strjoin(NULL, *tmp);
-	*tmp = NULL;
-	if (**new_line == '\0')
-	{
-		free(*new_line);
-		return (NULL);
-	}
-	return (*new_line);
-}
-
 char	*get_next_line(int fd)
 {
 	static char	*tmp = NULL;
@@ -64,11 +96,6 @@ char	*get_next_line(int fd)
 	new_line = NULL;
 	if (line_counter(tmp) != 0)
 		new_line = get_new_line_from_tmp(&tmp);
-	//else
-	//{
-	//	new_line = tmp;
-	//	tmp = NULL;
-	//}
 	else
 	{
 		is_eof = read_new_line(&tmp, fd);
@@ -77,69 +104,8 @@ char	*get_next_line(int fd)
 			return (NULL);
 		}
 	}
-	if (new_line == NULL && ((is_eof == 0 && ft_strlen(tmp, '\0') != 0) || is_eof != 0))
-	{
+	if (new_line == NULL && ((is_eof == 0 && gnl_strlen(tmp, '\0') != 0)
+			|| is_eof != 0))
 		new_line = get_new_line_from_tmp(&tmp);
-		//if (is_eof == 0 && line_counter(tmp) == 0)
-		//	tmp = NULL;
-	}
-	//printf("tmp:%s", tmp);
 	return (new_line);
 }
-
-/*
-int	main(void)
-{
-	//printf("%i", BUFFER_SIZE);
-
-	int fd;
-	int readd;
-	char *next_line;
-	int	cnt_line = 0;
-	int loop = 6;
-
-	//fd = 100;
-	//printf("get_next_line:%s\n", get_next_line(fd));
-
-	fd = open("./file.txt", O_RDONLY);
-	//readd = read(fd, next_line, 10);
-	//printf("fd:%i", readd);
-	//fd = open("file.txt", O_RDONLY);
-	
-	
-	//while (cnt_line != loop)
-	//{
-	//next_line = get_next_line(fd);
-	////if (next_line != NULL)
-	//	printf("get_next_line:%s\n", next_line);
-	////if (next_line != NULL)
-	//	cnt_line++;
-	//}
-	next_line = get_next_line(fd);
-	printf("get_next_line:%s\n", next_line);
-	printf("nstrcmp:%i\n", strcmp(next_line, "\n"));
-	//free(next_line);
-
-	next_line = get_next_line(fd);
-	printf("get_next_line:%s\n", next_line);
-	printf("nstrcmp:%i\n", next_line == NULL);
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("fd:%d\n", fd);
-
-	//	close(fd);
-	//fd = open("/Users/cgodecke/francinette/tests/get_next_line/fsoares/multiple_nl.txt", O_RDONLY);
-
-	//printf("get_next_line:%s\n", get_next_line(fd));
-			//printf("fd:%d\n", fd);
-
-	printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	//printf("get_next_line:%s\n", get_next_line(fd));
-	close(fd);
-	//printf("%i bytes were read.\n", sz);
-	//printf("Content:%c\n", buf[3]);
-
-
-}
-*/
