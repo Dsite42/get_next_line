@@ -6,7 +6,7 @@
 /*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:03 by chris             #+#    #+#             */
-/*   Updated: 2023/01/31 17:53:33 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/02/01 15:01:32 by cgodecke         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,7 @@ char	*reduce_tmp(char *str, int start)
 {
 	char	*new_tmp;
 	int		i;
-
+	//printf("reduce_tmp:%i", start);
 	if (ft_strlen(&str[start], '\0') == 0)
 	{
 		free(str);
@@ -132,8 +132,11 @@ int read_new_line(char **tmp, int fd)
 	char 	*buf;
 	int		is_eof;
 
+is_eof=-100;
 	while (line_counter(*tmp) == 0 && is_eof != 0)
 	{
+		if (is_eof < BUFFER_SIZE && is_eof != -100)
+			break;
 		is_eof = fill_buffer(&buf, fd);
 		if (is_eof == -1)
 		{
@@ -143,6 +146,8 @@ int read_new_line(char **tmp, int fd)
 		}
 		if (is_eof != 0)
 			*tmp = ft_strjoin(*tmp, buf);
+//		if (is_eof < BUFFER_SIZE)
+//fill_buffer(&buf, fd);
 	}
 	return (is_eof);
 }
