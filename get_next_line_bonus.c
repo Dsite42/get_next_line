@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cgodecke <cgodecke@student.42.fr>          +#+  +:+       +#+        */
+/*   By: chris <chris@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/13 16:01:08 by chris             #+#    #+#             */
-/*   Updated: 2023/02/01 17:55:38 by cgodecke         ###   ########.fr       */
+/*   Updated: 2023/02/02 10:54:24 by chris            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 char	*reduce_tmp(char *str, int start)
 {
@@ -89,12 +89,12 @@ int	fill_buffer(char **buf, int fd)
 
 char	*get_next_line(int fd)
 {
-	static char	*tmp = NULL;
+	char		*tmp;
 	char		*new_line;
 	int			is_eof;
-	static char	arr_fd[65536];	
+	static char	*fd_tmp_storage[MAX_FD];	
 
-	
+	tmp = fd_tmp_storage[fd];
 	new_line = NULL;
 	if (line_counter(tmp) != 0)
 		new_line = get_new_line_from_tmp(&tmp);
@@ -103,11 +103,13 @@ char	*get_next_line(int fd)
 		is_eof = read_new_line(&tmp, fd);
 		if (is_eof == -1)
 		{
+			fd_tmp_storage[fd] = tmp;
 			return (NULL);
 		}
 	}
 	if (new_line == NULL && ((is_eof == 0 && gnl_strlen(tmp, '\0') != 0)
 			|| is_eof != 0))
 		new_line = get_new_line_from_tmp(&tmp);
+	fd_tmp_storage[fd] = tmp;
 	return (new_line);
 }
